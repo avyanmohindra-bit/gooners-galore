@@ -1,0 +1,1832 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080a12">
+  <meta name="description" content="Darsh.exe — Arsenal loyalty, infinite scrolling, and absolutely zero attention span.">
+  <title>DARSH.EXE | The Gooner Experience</title>
+
+  <style>
+    /* =========================
+       1. DESIGN SYSTEM
+    ========================== */
+    :root {
+      --red: #EF0107;
+      --blue: #063672;
+      --navy: #080a12;
+      --panel: #111522;
+      --white: #f5f7ff;
+      --muted: #a1a9bc;
+      --neon: #b5ff35;
+      --purple: #a855f7;
+      --border: rgba(255,255,255,.11);
+      --radius: 22px;
+      --max-width: 1180px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px;
+    }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+      transition: background .5s ease, color .5s ease;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse at 10% 10%, rgba(239,1,7,.13), transparent 38%),
+        radial-gradient(ellipse at 90% 35%, rgba(6,54,114,.23), transparent 40%),
+        radial-gradient(ellipse at 55% 95%, rgba(168,85,247,.08), transparent 40%);
+    }
+
+    body.gooner-mode {
+      --navy: #020503;
+      --panel: #07110a;
+      --border: rgba(181,255,53,.24);
+      --muted: #a4c2a5;
+      background-color: #020503;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 3px,
+          rgba(181,255,53,.025) 4px
+        ),
+        radial-gradient(ellipse at 50% 50%, #102216 0%, #020503 72%);
+    }
+
+    body.gooner-mode::after {
+      content: "01000100 01000001 01010010 01010011 01001000";
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgba(181,255,53,.055);
+      font: 700 clamp(20px, 4vw, 50px)/2 monospace;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: -1;
+      word-break: break-all;
+      animation: matrixPulse 4s ease-in-out infinite alternate;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--neon);
+      outline-offset: 5px;
+    }
+
+    .container {
+      width: min(var(--max-width), calc(100% - 40px));
+      margin-inline: auto;
+    }
+
+    .section {
+      padding: 105px 0;
+      position: relative;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--neon);
+      font: 800 11px/1.4 monospace;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 22px;
+      height: 2px;
+      background: currentColor;
+    }
+
+    .section-heading {
+      font-size: clamp(34px, 5vw, 60px);
+      line-height: 1.04;
+      letter-spacing: -2.5px;
+      font-weight: 950;
+      margin: 18px 0;
+    }
+
+    .section-copy {
+      max-width: 620px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(110deg, #fff 10%, var(--neon) 65%, #6de5ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* =========================
+       2. NAVIGATION
+    ========================== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(8,10,18,.78);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      transition: background .4s ease;
+    }
+
+    .nav-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      font-size: 21px;
+      font-weight: 1000;
+      letter-spacing: -1px;
+    }
+
+    .brand span {
+      color: var(--red);
+    }
+
+    .brand small {
+      color: var(--neon);
+      font: 700 10px monospace;
+      display: block;
+      letter-spacing: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 27px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .nav-links a {
+      transition: color .2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--neon);
+    }
+
+    .mode-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(181,255,53,.08);
+      color: var(--neon);
+      border: 1px solid rgba(181,255,53,.4);
+      border-radius: 100px;
+      padding: 11px 15px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 850;
+      transition: .25s ease;
+      white-space: nowrap;
+    }
+
+    .mode-button:hover {
+      background: var(--neon);
+      color: #071006;
+      box-shadow: 0 0 25px rgba(181,255,53,.22);
+      transform: translateY(-2px);
+    }
+
+    /* =========================
+       3. HERO
+    ========================== */
+    .hero {
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      padding: 145px 0 80px;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.12fr .88fr;
+      align-items: center;
+      gap: 55px;
+    }
+
+    .live-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.035);
+      padding: 9px 13px;
+      border-radius: 8px;
+      font: 700 11px monospace;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--neon);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--neon);
+      animation: blink 1.2s infinite;
+    }
+
+    .hero h1 {
+      font-size: clamp(55px, 8.3vw, 106px);
+      font-weight: 1000;
+      letter-spacing: -7px;
+      line-height: .91;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .outline {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 1.5px rgba(255,255,255,.72);
+    }
+
+    .hero-description {
+      max-width: 510px;
+      font-size: 16px;
+      color: var(--muted);
+      margin-bottom: 27px;
+    }
+
+    .hero-description strong {
+      color: var(--white);
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 14px 20px;
+      cursor: pointer;
+      font-weight: 850;
+      font-size: 13px;
+      transition: transform .25s ease, box-shadow .25s ease,
+        background .25s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+    }
+
+    .btn-primary {
+      background: var(--red);
+      color: white;
+      box-shadow: 0 8px 28px rgba(239,1,7,.2);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 12px 36px rgba(239,1,7,.4);
+    }
+
+    .btn-secondary {
+      border-color: var(--border);
+      background: rgba(255,255,255,.035);
+      color: var(--white);
+    }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 25px;
+      font-weight: 950;
+      letter-spacing: -1px;
+    }
+
+    .stat span {
+      font: 700 10px monospace;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Hero visual: original CSS artwork, no external images */
+    .hero-art {
+      min-height: 475px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      perspective: 900px;
+    }
+
+    .orbit {
+      position: absolute;
+      width: 390px;
+      height: 390px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 50%;
+      animation: orbitSpin 24s linear infinite;
+    }
+
+    .orbit::before,
+    .orbit::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+    }
+
+    .orbit::before {
+      width: 11px;
+      height: 11px;
+      background: var(--neon);
+      top: 50px;
+      left: 35px;
+      box-shadow: 0 0 22px var(--neon);
+    }
+
+    .orbit::after {
+      width: 8px;
+      height: 8px;
+      background: var(--purple);
+      right: 20px;
+      bottom: 100px;
+      box-shadow: 0 0 20px var(--purple);
+    }
+
+    .orbit-two {
+      width: 315px;
+      height: 315px;
+      border-color: rgba(239,1,7,.3);
+      animation-direction: reverse;
+      animation-duration: 18s;
+    }
+
+    .art-card {
+      width: min(100%, 355px);
+      min-height: 390px;
+      position: relative;
+      z-index: 2;
+      padding: 27px;
+      overflow: hidden;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.15);
+      background:
+        linear-gradient(145deg, rgba(239,1,7,.24), transparent 50%),
+        linear-gradient(30deg, rgba(6,54,114,.6), rgba(15,18,32,.96));
+      box-shadow: 0 30px 90px rgba(0,0,0,.35);
+      transform: rotateY(-8deg) rotateX(3deg);
+      animation: cardFloat 6s ease-in-out infinite;
+    }
+
+    .art-card::before {
+      content: "";
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: rgba(239,1,7,.23);
+      filter: blur(55px);
+      right: -100px;
+      top: 20px;
+    }
+
+    .art-top,
+    .art-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .art-label {
+      font: 800 10px monospace;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+    }
+
+    .art-status {
+      font: 800 10px monospace;
+      color: var(--neon);
+      border: 1px solid rgba(181,255,53,.3);
+      padding: 5px 8px;
+      border-radius: 5px;
+    }
+
+    .art-emblem {
+      width: 145px;
+      height: 155px;
+      margin: 42px auto 35px;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(255,255,255,.7);
+      border-radius: 48% 48% 12px 12px;
+      background: linear-gradient(150deg, var(--red), #940008);
+      box-shadow: 0 0 55px rgba(239,1,7,.28);
+      transform: rotate(-4deg);
+      position: relative;
+      z-index: 1;
+    }
+
+    .art-emblem span {
+      font-size: 52px;
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: -5px;
+      color: white;
+    }
+
+    .art-title {
+      position: relative;
+      z-index: 1;
+      font-size: 31px;
+      font-weight: 1000;
+      line-height: 1;
+      letter-spacing: -1.5px;
+    }
+
+    .art-subtitle {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      font: 700 10px monospace;
+      margin-top: 9px;
+      letter-spacing: 1px;
+    }
+
+    .art-bottom {
+      margin-top: 25px;
+      border-top: 1px solid var(--border);
+      padding-top: 17px;
+    }
+
+    .art-bottom strong {
+      font-size: 12px;
+    }
+
+    .art-bottom span {
+      font: 700 10px monospace;
+      color: var(--neon);
+    }
+
+    .floating-label {
+      position: absolute;
+      z-index: 4;
+      background: #111522;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 15px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.3);
+      font: 750 11px monospace;
+      animation: cardFloat 5s ease-in-out infinite;
+    }
+
+    .float-one {
+      top: 60px;
+      right: 0;
+      color: var(--neon);
+    }
+
+    .float-two {
+      bottom: 55px;
+      left: -8px;
+      animation-delay: -2s;
+      color: #ff7478;
+    }
+
+    /* =========================
+       4. MOVING TICKER
+    ========================== */
+    .ticker {
+      overflow: hidden;
+      border-block: 1px solid var(--border);
+      background: rgba(255,255,255,.025);
+      padding: 17px 0;
+    }
+
+    .ticker-track {
+      width: max-content;
+      display: flex;
+      gap: 35px;
+      animation: tickerMove 27s linear infinite;
+    }
+
+    .ticker-track span {
+      color: var(--muted);
+      font: 900 12px monospace;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .ticker-track b {
+      color: var(--red);
+    }
+
+    /* =========================
+       5. SCREEN TIME TRACKER
+    ========================== */
+    .tracker-layout {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 30px;
+      margin-top: 42px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .3s ease, transform .3s ease;
+    }
+
+    .panel:hover {
+      border-color: rgba(181,255,53,.3);
+    }
+
+    .tracker-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 340px;
+    }
+
+    .panel-topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font: 750 11px monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .live-badge {
+      padding: 5px 8px;
+      border-radius: 5px;
+      background: rgba(181,255,53,.1);
+      color: var(--neon);
+      font-size: 10px;
+    }
+
+    .counter {
+      font-size: clamp(37px, 5vw, 57px);
+      line-height: 1;
+      letter-spacing: -3px;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      margin: 27px 0 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .counter-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meter {
+      height: 7px;
+      background: rgba(255,255,255,.08);
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 23px 0 12px;
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--red), var(--purple), var(--neon));
+      border-radius: inherit;
+      transition: width .6s ease;
+    }
+
+    .meter-caption {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font: 700 10px monospace;
+    }
+
+    .tracker-note {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 20px;
+    }
+
+    .tracker-note strong {
+      color: var(--neon);
+    }
+
+    .diagnostics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .diagnostic {
+      min-height: 150px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 20px;
+      transition: transform .25s ease, background .25s ease;
+    }
+
+    .diagnostic:hover {
+      transform: translateY(-5px);
+      background: rgba(181,255,53,.04);
+    }
+
+    .diagnostic small {
+      display: block;
+      color: var(--muted);
+      font: 750 10px monospace;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .diagnostic strong {
+      display: block;
+      margin-top: 15px;
+      font-size: 25px;
+      font-weight: 950;
+      letter-spacing: -1px;
+    }
+
+    .diagnostic p {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    /* =========================
+       6. ARSENAL CORNER
+    ========================== */
+    .arsenal-section {
+      background:
+        linear-gradient(180deg, transparent, rgba(239,1,7,.045), transparent);
+    }
+
+    .arsenal-banner {
+      position: relative;
+      overflow: hidden;
+      margin-top: 40px;
+      padding: clamp(25px, 5vw, 55px);
+      border: 1px solid rgba(239,1,7,.28);
+      border-radius: 25px;
+      background:
+        linear-gradient(110deg, rgba(239,1,7,.17), transparent 55%),
+        linear-gradient(150deg, #111522, #080a12);
+    }
+
+    .arsenal-banner::after {
+      content: "AFC";
+      position: absolute;
+      right: -12px;
+      bottom: -75px;
+      color: rgba(239,1,7,.075);
+      font-size: clamp(140px, 24vw, 300px);
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: -15px;
+      pointer-events: none;
+    }
+
+    .arsenal-banner h3 {
+      position: relative;
+      z-index: 1;
+      max-width: 650px;
+      font-size: clamp(30px, 5vw, 57px);
+      font-weight: 950;
+      letter-spacing: -2px;
+      line-height: 1.06;
+      margin: 18px 0;
+    }
+
+    .arsenal-banner p {
+      position: relative;
+      z-index: 1;
+      max-width: 550px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .arsenal-banner .btn {
+      position: relative;
+      z-index: 2;
+      margin-top: 25px;
+    }
+
+    .match-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .match-card {
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      padding: 25px;
+      background: var(--panel);
+      transition: transform .3s ease, border-color .3s ease;
+    }
+
+    .match-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(239,1,7,.6);
+    }
+
+    .match-card .number {
+      font: 900 11px monospace;
+      color: var(--red);
+    }
+
+    .match-card h4 {
+      margin: 15px 0 8px;
+      font-size: 19px;
+      line-height: 1.25;
+    }
+
+    .match-card p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* =========================
+       7. BRAINROT CHAMBER
+    ========================== */
+    .brainrot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 40px;
+    }
+
+    .brain-card {
+      min-height: 245px;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 19px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform .35s ease, border-color .35s ease,
+        box-shadow .35s ease;
+    }
+
+    .brain-card::before {
+      content: "";
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      filter: blur(60px);
+      background: var(--card-glow, var(--purple));
+      opacity: .10;
+      top: -70px;
+      right: -60px;
+      transition: opacity .35s ease;
+    }
+
+    .brain-card:hover {
+      transform: translateY(-7px) scale(1.015);
+      border-color: var(--card-glow, var(--purple));
+      box-shadow: 0 20px 50px rgba(0,0,0,.15);
+    }
+
+    .brain-card:hover::before {
+      opacity: .35;
+    }
+
+    .brain-card:nth-child(1) { --card-glow: var(--purple); }
+    .brain-card:nth-child(2) { --card-glow: var(--neon); }
+    .brain-card:nth-child(3) { --card-glow: var(--red); }
+    .brain-card:nth-child(4) { --card-glow: #52c5ff; }
+    .brain-card:nth-child(5) { --card-glow: var(--purple); }
+    .brain-card:nth-child(6) { --card-glow: var(--neon); }
+
+    .brain-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brain-index {
+      color: var(--muted);
+      font: 800 11px monospace;
+    }
+
+    .brain-tag {
+      font: 800 9px monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+    }
+
+    .brain-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brain-content h3 {
+      font-size: 23px;
+      font-weight: 950;
+      letter-spacing: -.8px;
+      line-height: 1.15;
+      margin-bottom: 9px;
+    }
+
+    .brain-content p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .brain-content .reveal {
+      display: none;
+      margin-top: 12px;
+      color: var(--neon);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .brain-card.active .reveal {
+      display: block;
+      animation: revealIn .3s ease;
+    }
+
+    .brain-card.active {
+      border-color: var(--card-glow, var(--purple));
+    }
+
+    .chamber-hint {
+      margin-top: 18px;
+      color: var(--muted);
+      font: 700 11px monospace;
+    }
+
+    /* =========================
+       8. FINAL ROAST
+    ========================== */
+    .final-section {
+      padding-top: 50px;
+    }
+
+    .final-card {
+      padding: clamp(35px, 7vw, 80px) 25px;
+      border-radius: 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(239,1,7,.18), transparent 60%),
+        var(--panel);
+    }
+
+    .final-card h2 {
+      font-size: clamp(37px, 7vw, 78px);
+      line-height: .98;
+      letter-spacing: -4px;
+      font-weight: 1000;
+      max-width: 850px;
+      margin: 22px auto;
+    }
+
+    .final-card p {
+      max-width: 570px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .final-card .btn {
+      margin-top: 28px;
+    }
+
+    .chaos-output {
+      min-height: 27px;
+      margin-top: 20px;
+      color: var(--neon);
+      font: 800 12px monospace;
+    }
+
+    /* =========================
+       9. FOOTER
+    ========================== */
+    footer {
+      padding: 35px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .footer-credit {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-credit strong {
+      color: var(--white);
+    }
+
+    .footer-code {
+      color: var(--muted);
+      font: 700 10px monospace;
+      letter-spacing: 1px;
+    }
+
+    /* =========================
+       10. SCROLL REVEAL
+    ========================== */
+    .js-ready .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(25px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+
+    .js-ready .reveal-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* =========================
+       11. ANIMATIONS
+    ========================== */
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .25; }
+    }
+
+    @keyframes orbitSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes cardFloat {
+      0%, 100% { transform: translateY(0) rotateY(-8deg) rotateX(3deg); }
+      50% { transform: translateY(-10px) rotateY(-5deg) rotateX(1deg); }
+    }
+
+    @keyframes tickerMove {
+      to { transform: translateX(-50%); }
+    }
+
+    @keyframes matrixPulse {
+      from { opacity: .45; }
+      to { opacity: 1; }
+    }
+
+    @keyframes revealIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================
+       12. RESPONSIVE DESIGN
+    ========================== */
+    @media (max-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      .hero-copy {
+        max-width: 720px;
+      }
+
+      .hero-art {
+        min-height: 430px;
+      }
+
+      .tracker-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .brainrot-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .nav-links {
+        gap: 15px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .container {
+        width: min(100% - 30px, var(--max-width));
+      }
+
+      .section {
+        padding: 75px 0;
+      }
+
+      .nav-inner {
+        min-height: 68px;
+        gap: 10px;
+      }
+
+      .brand {
+        font-size: 18px;
+      }
+
+      .brand small {
+        font-size: 8px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .mode-button {
+        padding: 10px 12px;
+        font-size: 10px;
+      }
+
+      .hero {
+        padding-top: 120px;
+      }
+
+      .hero h1 {
+        font-size: clamp(49px, 14vw, 75px);
+        letter-spacing: -4px;
+      }
+
+      .hero-description {
+        font-size: 14px;
+      }
+
+      .hero-stats {
+        gap: 23px;
+      }
+
+      .hero-art {
+        min-height: 380px;
+      }
+
+      .orbit {
+        width: 310px;
+        height: 310px;
+      }
+
+      .orbit-two {
+        width: 260px;
+        height: 260px;
+      }
+
+      .art-card {
+        width: 285px;
+        min-height: 335px;
+        padding: 20px;
+      }
+
+      .art-emblem {
+        width: 110px;
+        height: 115px;
+        margin: 28px auto 25px;
+      }
+
+      .art-emblem span {
+        font-size: 42px;
+      }
+
+      .art-title {
+        font-size: 27px;
+      }
+
+      .float-one {
+        right: 0;
+        top: 15px;
+      }
+
+      .float-two {
+        left: 0;
+        bottom: 12px;
+      }
+
+      .tracker-panel,
+      .panel {
+        padding: 22px;
+      }
+
+      .diagnostics {
+        gap: 9px;
+      }
+
+      .diagnostic {
+        padding: 15px;
+        min-height: 135px;
+      }
+
+      .diagnostic strong {
+        font-size: 21px;
+      }
+
+      .match-grid,
+      .brainrot-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .match-card {
+        padding: 22px;
+      }
+
+      .brain-card {
+        min-height: 205px;
+      }
+
+      .section-heading {
+        letter-spacing: -1.7px;
+      }
+
+      .final-card h2 {
+        letter-spacing: -2px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVIGATION -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#home" class="brand" aria-label="Darsh.exe home">
+        DARSH<span>.EXE</span>
+        <small>GOONER OPERATING SYSTEM</small>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#tracker">Statistics</a>
+        <a href="#arsenal">Arsenal</a>
+        <a href="#brainrot">Brainrot</a>
+      </nav>
+
+      <button class="mode-button" id="modeToggle" aria-pressed="false">
+        <span id="modeLabel">GOONER MODE: OFF</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="live-tag">
+            <span class="live-dot"></span>
+            SUBJECT DETECTED: DARSH
+          </div>
+
+          <h1>
+            BUILT<br>
+            DIFFERENT<span class="outline">. UNFORTUNATE.</span>
+          </h1>
+
+          <p class="hero-description">
+            Introducing <strong>Darsh</strong>: an elite Arsenal loyalist,
+            a world-class professional scroller, and the only person who
+            can watch 47 reels in a row and remember absolutely none of them.
+            Two passions. One screen. Zero recovery.
+          </p>
+
+          <div class="hero-buttons">
+            <a href="#brainrot" class="btn btn-primary">
+              ENTER THE CHAMBER
+            </a>
+            <a href="#arsenal" class="btn btn-secondary">
+              INSPECT THE DAMAGE
+            </a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat">
+              <strong>24/7</strong>
+              <span>Scroll Availability</span>
+            </div>
+            <div class="stat">
+              <strong>0.2s</strong>
+              <span>Attention Span</span>
+            </div>
+            <div class="stat">
+              <strong>COYG</strong>
+              <span>Emotional Damage</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-label="Animated Darsh.exe digital artwork">
+          <div class="orbit"></div>
+          <div class="orbit orbit-two"></div>
+
+          <div class="floating-label float-one">BRAINROT: MAXIMUM</div>
+          <div class="floating-label float-two">ARSENAL: STILL WAITING</div>
+
+          <div class="art-card">
+            <div class="art-top">
+              <span class="art-label">SUBJECT PROFILE</span>
+              <span class="art-status">ONLINE</span>
+            </div>
+
+            <div class="art-emblem">
+              <span>D.</span>
+            </div>
+
+            <div class="art-title">DARSH.EXE</div>
+            <div class="art-subtitle">HUMAN? QUESTIONABLE.</div>
+
+            <div class="art-bottom">
+              <strong>GOONER CLASS: ELITE</strong>
+              <span>LVL 99</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TICKER -->
+    <div class="ticker" aria-label="Darsh status ticker">
+      <div class="ticker-track">
+        <span>ARSENAL TILL I DIE <b>/</b></span>
+        <span>ONE MORE REEL <b>/</b></span>
+        <span>PRODUCTIVITY NOT FOUND <b>/</b></span>
+        <span>COYG <b>/</b></span>
+        <span>SCREEN TIME: CLASSIFIED <b>/</b></span>
+        <span>ARSENAL TILL I DIE <b>/</b></span>
+        <span>ONE MORE REEL <b>/</b></span>
+        <span>PRODUCTIVITY NOT FOUND <b>/</b></span>
+        <span>COYG <b>/</b></span>
+        <span>SCREEN TIME: CLASSIFIED <b>/</b></span>
+      </div>
+    </div>
+
+    <!-- TRACKER -->
+    <section class="section" id="tracker">
+      <div class="container">
+        <div class="reveal-on-scroll">
+          <span class="eyebrow">LIVE SUBJECT MONITOR</span>
+          <h2 class="section-heading">
+            THE NUMBERS<br>
+            <span class="gradient-text">DON'T LIE.</span>
+          </h2>
+          <p class="section-copy">
+            A completely unofficial monitoring system for a completely
+            unserious individual. Start the page, and the counter starts
+            ticking. The statistics below are satirical estimates, not
+            measurements of Darsh's actual phone usage.
+          </p>
+        </div>
+
+        <div class="tracker-layout reveal-on-scroll">
+          <div class="panel tracker-panel">
+            <div>
+              <div class="panel-topline">
+                <span>Session Screen-Time Simulator</span>
+                <span class="live-badge">LIVE</span>
+              </div>
+
+              <div class="counter" id="screenCounter">00:00:00</div>
+              <p class="counter-label">
+                Time this page has been open. Not Darsh's actual device usage.
+              </p>
+
+              <div class="meter">
+                <div class="meter-fill" id="screenMeter"></div>
+              </div>
+              <div class="meter-caption">
+                <span>SESSION PROGRESS</span>
+                <span id="meterLabel">0% OF 1 HOUR</span>
+              </div>
+            </div>
+
+            <p class="tracker-note">
+              SYSTEM STATUS: <strong id="trackerStatus">SUBJECT IS DEFINITELY SCROLLING.</strong>
+            </p>
+          </div>
+
+          <div class="diagnostics">
+            <div class="diagnostic">
+              <small>Brain cells remaining</small>
+              <strong>404</strong>
+              <p>Thoughts not found.</p>
+            </div>
+
+            <div class="diagnostic">
+              <small>Focus duration</small>
+              <strong>0.2 sec</strong>
+              <p>A goldfish is taking notes.</p>
+            </div>
+
+            <div class="diagnostic">
+              <small>Tabs open mentally</small>
+              <strong>9,001</strong>
+              <p>None of them responding.</p>
+            </div>
+
+            <div class="diagnostic">
+              <small>Arsenal optimism</small>
+              <strong>100%</strong>
+              <p>Hope remains undefeated.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARSENAL -->
+    <section class="section arsenal-section" id="arsenal">
+      <div class="container">
+        <div class="reveal-on-scroll">
+          <span class="eyebrow">THE FOOTBALL SIDE QUEST</span>
+          <h2 class="section-heading">
+            NORTH LONDON.<br>
+            <span style="color:var(--red)">RED FLAGS.</span>
+          </h2>
+          <p class="section-copy">
+            Darsh doesn't just support Arsenal. He has apparently signed
+            an invisible lifetime contract with stress, hope, and
+            checking the score every 11 seconds.
+          </p>
+        </div>
+
+        <div class="arsenal-banner reveal-on-scroll">
+          <span class="eyebrow">ARSENAL SUPPORTER PROTOCOL</span>
+          <h3>ONE CLUB.<br>ONE DREAM.<br>SEVERAL BLOOD PRESSURE SPIKES.</h3>
+          <p>
+            Match day begins with confidence, continues with tactical
+            analysis from the sofa, and ends with Darsh explaining why
+            the next game will definitely be different.
+          </p>
+          <a href="#brainrot" class="btn btn-primary">VIEW THE FULL DIAGNOSIS</a>
+        </div>
+
+        <div class="match-grid reveal-on-scroll">
+          <article class="match-card">
+            <span class="number">01 / PRE-MATCH</span>
+            <h4>The Tactical Genius</h4>
+            <p>
+              Has already selected the starting XI, replaced three
+              players, and won the league in his imagination.
+            </p>
+          </article>
+
+          <article class="match-card">
+            <span class="number">02 / KICK-OFF</span>
+            <h4>Manager From The Sofa</h4>
+            <p>
+              Every misplaced pass gets a review. Every substitution
+              gets a press conference. Nobody asked for either.
+            </p>
+          </article>
+
+          <article class="match-card">
+            <span class="number">03 / FULL-TIME</span>
+            <h4>The Post-Match Podcast</h4>
+            <p>
+              Whatever happened, Darsh has a 45-minute explanation
+              ready. The referee, the weather, and Mercury are suspects.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- BRAINROT CHAMBER -->
+    <section class="section" id="brainrot">
+      <div class="container">
+        <div class="reveal-on-scroll">
+          <span class="eyebrow">RESTRICTED ACCESS</span>
+          <h2 class="section-heading">
+            WELCOME TO THE<br>
+            <span class="gradient-text">BRAINROT CHAMBER.</span>
+          </h2>
+          <p class="section-copy">
+            Six documented symptoms of terminal internet residency.
+            Click any card to uncover its confidential subject report.
+          </p>
+        </div>
+
+        <div class="brainrot-grid">
+          <article class="brain-card reveal-on-scroll" tabindex="0" role="button" aria-expanded="false">
+            <div class="brain-top">
+              <span class="brain-index">CASE_001</span>
+              <span class="brain-tag">NIGHT SHIFT</span>
+            </div>
+            <div class="brain-content">
+              <h3>3 AM Scrolling Habits</h3>
+              <p>One last reel. Famous last words.</p>
+              <div class="reveal">The birds are awake. Darsh is still on the same app.</div>
+            </div>
+          </article>
+
+          <article class="brain-card reveal-on-scroll" tabindex="0" role="button" aria-expanded="false">
+            <div class="brain-top">
+              <span class="brain-index">CASE_002</span>
+              <span class="brain-tag">CRITICAL</span>
+            </div>
+            <div class="brain-content">
+              <h3>Attention Span: 404</h3>
+              <p>Loading concentration...</p>
+              <div class="reveal">Task completed: opened another tab and forgot the original task.</div>
+            </div>
+          </article>
+
+          <article class="brain-card reveal-on-scroll" tabindex="0" role="button" aria-expanded="false">
+            <div class="brain-top">
+              <span class="brain-index">CASE_003</span>
+              <span class="brain-tag">LOCKED IN</span>
+            </div>
+            <div class="brain-content">
+              <h3>Professional Gooner</h3>
+              <p>Two meanings. Double the damage.</p>
+              <div class="reveal">Arsenal on the television. Infinite scroll on the phone. Dual-monitor madness.</div>
+            </div>
+          </article>
+
+          <article class="brain-card reveal-on-scroll" tabindex="0" role="button" aria-expanded="false">
+            <div class="brain-top">
+              <span class="brain-index">CASE_004</span>
+              <span class="brain-tag">AUTOPILOT</span>
+            </div>
+            <div class="brain-content">
+              <h3>Infinite Scroll</h3>
+              <p>There is no bottom. There is no escape.</p>
+              <div class="reveal">The algorithm knows him better than his own timetable does.</div>
+            </div>
+          </article>
+
+          <article class="brain-card reveal-on-scroll" tabindex="0" role="button" aria-expanded="false">
+            <div class="brain-top">
+              <span class="brain-index">CASE_005</span>
+              <span class="brain-tag">DELUSIONAL OPTIMISM</span>
+            </div>
+            <div class="brain-content">
+              <h3>Arsenal Every Year</h3>
+              <p>This is definitely the season.</p>
+              <div class="reveal">New season. New hope. Same emotionally expensive subscription.</div>
+            </div>
+          </article>
+
+          <article class="brain-card reveal-on-scroll" tabindex="0" role="button" aria-expanded="false">
+            <div class="brain-top">
+              <span class="brain-index">CASE_006</span>
+              <span class="brain-tag">FINAL BOSS</span>
+            </div>
+            <div class="brain-content">
+              <h3>Locked In (To Nothing)</h3>
+              <p>Maximum focus. Zero useful output.</p>
+              <div class="reveal">If scrolling were a school subject, Darsh would still ask for extra credit.</div>
+            </div>
+          </article>
+        </div>
+
+        <p class="chamber-hint">
+          INTERACTION TIP: CLICK A CASE FILE TO REVEAL THE CLASSIFIED REPORT.
+        </p>
+      </div>
+    </section>
+
+    <!-- FINAL ROAST -->
+    <section class="section final-section">
+      <div class="container">
+        <div class="final-card reveal-on-scroll">
+          <span class="eyebrow">THE FINAL DIAGNOSIS</span>
+
+          <h2>
+            HIS PHONE IS<br>
+            HIS <span style="color:var(--red)">MANAGER.</span>
+          </h2>
+
+          <p>
+            In conclusion, Darsh is a loyal Gunner, a certified scroll
+            enthusiast, and a friend whose screen time deserves its own
+            documentary. This website is a joke, the statistics are
+            fictional, and the friendship is hopefully still intact.
+          </p>
+
+          <button class="btn btn-primary" id="chaosButton">
+            INITIATE FRIENDSHIP ROAST
+          </button>
+
+          <div class="chaos-output" id="chaosOutput" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-inner">
+      <p class="footer-credit">
+        Website designed and developed by <strong>Avyan &amp; Ridhaan Jain</strong>
+      </p>
+      <p class="footer-code">DARSH.EXE // END OF REPORT</p>
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+
+    /* =========================
+       1. HERO TEXT ROTATION
+    ========================== */
+    const heroTitles = [
+      ["DARSH:", "ARSENAL FAN"],
+      ["DARSH:", "SCREEN TIME CHAMPION"],
+      ["DARSH:", "PROFESSIONAL SCROLLER"],
+      ["DARSH:", "NORTH LONDON BELIEVER"]
+    ];
+
+    let heroIndex = 0;
+
+    // Rotate the main hero headline without changing its layout.
+    const heroHeading = document.querySelector(".hero h1");
+    const originalHeroHeading = heroHeading.innerHTML;
+
+    // The initial headline stays visible; the rotating status appears
+    // in the profile card for a smooth, accessible text transition.
+    const artTitle = document.querySelector(".art-title");
+    const artSubtitle = document.querySelector(".art-subtitle");
+
+    const heroStatus = [
+      ["DARSH: ARSENAL FAN", "LOYALTY LEVEL: UNREASONABLE"],
+      ["DARSH: SCREEN TIME CHAMPION", "PRODUCTIVITY LEVEL: MISSING"],
+      ["DARSH: PROFESSIONAL SCROLLER", "THUMB SPEED: WORLD CLASS"],
+      ["DARSH: NORTH LONDON BELIEVER", "HOPE LEVEL: PERMANENT"]
+    ];
+
+    function rotateHeroStatus() {
+      heroIndex = (heroIndex + 1) % heroStatus.length;
+
+      artTitle.style.opacity = "0";
+      artSubtitle.style.opacity = "0";
+
+      window.setTimeout(() => {
+        artTitle.textContent = heroStatus[heroIndex][0];
+        artSubtitle.textContent = heroStatus[heroIndex][1];
+
+        artTitle.style.transition = "opacity .35s ease";
+        artSubtitle.style.transition = "opacity .35s ease";
+
+        artTitle.style.opacity = "1";
+        artSubtitle.style.opacity = "1";
+      }, 250);
+    }
+
+    window.setInterval(rotateHeroStatus, 3000);
+
+    /* =========================
+       2. LIVE SESSION COUNTER
+    ========================== */
+    const counter = document.getElementById("screenCounter");
+    const meterFill = document.getElementById("screenMeter");
+    const meterLabel = document.getElementById("meterLabel");
+    const trackerStatus = document.getElementById("trackerStatus");
+
+    // Counts the time this page has been open.
+    // It does NOT read or claim to measure the user's actual device usage.
+    const sessionStartedAt = Date.now();
+
+    function formatTime(totalSeconds) {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      return [hours, minutes, seconds]
+        .map(value => String(value).padStart(2, "0"))
+        .join(":");
+    }
+
+    function updateTracker() {
+      const elapsed = Math.floor((Date.now() - sessionStartedAt) / 1000);
+      const progress = (elapsed % 3600) / 3600 * 100;
+
+      counter.textContent = formatTime(elapsed);
+      meterFill.style.width = progress + "%";
+      meterLabel.textContent = Math.floor(progress) + "% OF 1 HOUR";
+
+      if (elapsed < 60) {
+        trackerStatus.textContent = "SUBJECT HAS JUST ENTERED THE RABBIT HOLE.";
+      } else if (elapsed < 600) {
+        trackerStatus.textContent = "SUBJECT IS STILL INVESTIGATING.";
+      } else {
+        trackerStatus.textContent = "PRODUCTIVITY HAS LEFT THE BUILDING.";
+      }
+    }
+
+    updateTracker();
+    window.setInterval(updateTracker, 1000);
+
+    /* =========================
+       3. GOONER MODE TOGGLE
+    ========================== */
+    const modeToggle = document.getElementById("modeToggle");
+    const modeLabel = document.getElementById("modeLabel");
+
+    modeToggle.addEventListener("click", () => {
+      const enabled = document.body.classList.toggle("gooner-mode");
+
+      modeToggle.setAttribute("aria-pressed", String(enabled));
+      modeLabel.textContent = enabled
+        ? "GOONER MODE: ON"
+        : "GOONER MODE: OFF";
+    });
+
+    /* =========================
+       4. INTERACTIVE CASE FILES
+    ========================== */
+    const brainCards = document.querySelectorAll(".brain-card");
+
+    function toggleBrainCard(card) {
+      const isActive = card.classList.toggle("active");
+      card.setAttribute("aria-expanded", String(isActive));
+    }
+
+    brainCards.forEach(card => {
+      card.addEventListener("click", () => toggleBrainCard(card));
+
+      // Keyboard accessibility: Enter or Space opens a case file.
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleBrainCard(card);
+        }
+      });
+    });
+
+    /* =========================
+       5. FRIENDSHIP ROAST GENERATOR
+    ========================== */
+    const chaosButton = document.getElementById("chaosButton");
+    const chaosOutput = document.getElementById("chaosOutput");
+
+    const roasts = [
+      "BREAKING: Darsh opened his phone and forgot his original mission.",
+      "ARSENAL HAS 11 PLAYERS. DARSH HAS 11,000 OPEN TABS.",
+      "His screen protector has seen more action than his productivity.",
+      "Scientists have confirmed that one last reel is never the last reel.",
+      "Darsh's attention span just rage-quit before the page loaded.",
+      "He watches Arsenal for 90 minutes and scrolls for the post-match analysis.",
+      "Task manager opened. Task immediately forgotten.",
+      "The algorithm sends him a thank-you card every year.",
+      "Even the loading screen has a longer attention span.",
+      "Darsh.exe has encountered an error: TOO MANY REELS RUNNING."
+    ];
+
+    let lastRoastIndex = -1;
+
+    chaosButton.addEventListener("click", () => {
+      let index;
+
+      // Avoid repeating the same roast twice in a row.
+      do {
+        index = Math.floor(Math.random() * roasts.length);
+      } while (index === lastRoastIndex && roasts.length > 1);
+
+      lastRoastIndex = index;
+      chaosOutput.textContent = roasts[index];
+
+      chaosOutput.animate(
+        [
+          { opacity: 0, transform: "translateY(8px)" },
+          { opacity: 1, transform: "translateY(0)" }
+        ],
+        { duration: 300, easing: "ease-out" }
+      );
+    });
+
+    /* =========================
+       6. SCROLL REVEAL
+    ========================== */
+    document.documentElement.classList.add("js-ready");
+
+    const revealElements = document.querySelectorAll(".reveal-on-scroll");
+
+    if ("IntersectionObserver" in window) {
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.12
+      });
+
+      revealElements.forEach(element => revealObserver.observe(element));
+    } else {
+      // Fallback for browsers without IntersectionObserver.
+      revealElements.forEach(element => element.classList.add("visible"));
+    }
+
+    /* =========================
+       7. SMALL POLISH DETAILS
+    ========================== */
+
+    // Pause the moving ticker when the user hovers over it.
+    const ticker = document.querySelector(".ticker-track");
+
+    ticker.addEventListener("mouseenter", () => {
+      ticker.style.animationPlayState = "paused";
+    });
+
+    ticker.addEventListener("mouseleave", () => {
+      ticker.style.animationPlayState = "running";
+    });
+
+    // Keep the console message in the same spirit as the website.
+    console.log(
+      "%cDARSH.EXE",
+      "color:#b5ff35;font-size:24px;font-weight:900;"
+    );
+    console.log(
+      "%cSystem status: Arsenal optimism online. Attention span unavailable.",
+      "color:#EF0107;font-size:12px;"
+    );
+  </script>
+</body>
+</html>
+```
